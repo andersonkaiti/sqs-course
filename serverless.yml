@@ -1,0 +1,22 @@
+service: sqs-course
+
+provider:
+  name: aws
+  runtime: nodejs24.x
+  architecture: arm64
+
+package:
+  individually: true
+
+build:
+  esbuild:
+    minify: true
+    sourcemap: false
+
+functions:
+  hello:
+    handler: src/functions/hello.handler
+    events:
+      - httpApi:
+          path: /
+          method: GET
