@@ -25,8 +25,8 @@ build:
     sourcemap: false
 
 functions:
-  hello:
-    handler: src/functions/hello.handler
+  placeOrder:
+    handler: src/functions/place-order.handler
     events:
       - httpApi:
           path: /
