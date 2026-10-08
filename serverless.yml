@@ -4,6 +4,17 @@ provider:
   name: aws
   runtime: nodejs24.x
   architecture: arm64
+  environment:
+    SQS_URL: !Ref SQS
+  iam:
+    role:
+      statements:
+        - Action:
+            - sqs:SendMessage
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+          Effect: 'Allow'
+          Resource: !GetAtt SQS.Arn
 
 package:
   individually: true
@@ -20,3 +31,11 @@ functions:
       - httpApi:
           path: /
           method: GET
+
+resources:
+  Resources:
+    SQS:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: orders_queue
+        ReceiveMessageWaitTimeSeconds: 20
