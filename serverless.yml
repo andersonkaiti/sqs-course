@@ -6,6 +6,7 @@ provider:
   architecture: arm64
   environment:
     SQS_URL: !Ref SQS
+    DLQ_URL: !Ref DLQ
     PAYMENTS_TABLE_NAME: !Ref PaymentsTable
   iam:
     role:
@@ -53,6 +54,15 @@ resources:
       Properties:
         QueueName: orders_queue
         ReceiveMessageWaitTimeSeconds: 20
+        RedrivePolicy:
+          deadLetterTargetArn: !GetAtt DLQ.Arn
+          maxReceiveCount: 3
+    DLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: orders_dlq
+        ReceiveMessageWaitTimeSeconds: 20
+        MessageRetentionPeriod: 1209600 # 60 * 60 * 24 * 14 = 14 days
     PaymentsTable:
       Type: AWS::DynamoDB::Table
       Properties:
