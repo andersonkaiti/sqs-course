@@ -46,6 +46,7 @@ functions:
           arn: !GetAtt SQS.Arn
           batchSize: 10
           maximumBatchingWindow: 10
+          functionResponseType: ReportBatchItemFailures
 
 resources:
   Resources:

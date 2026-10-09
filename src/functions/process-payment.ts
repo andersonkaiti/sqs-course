@@ -4,7 +4,12 @@ import { env } from '@config/env.ts'
 import type { SQSEvent } from 'aws-lambda'
 
 export async function handler(event: SQSEvent) {
-  const putItems = event.Records.map((record) => {
+  const putItems = event.Records.map(async (record, index) => {
+    // mocking a dynamo error
+    if (index === 0) {
+      throw new Error('Dynamo error.')
+    }
+
     const body = JSON.parse(record.body)
 
     const command = new PutCommand({
@@ -17,5 +22,18 @@ export async function handler(event: SQSEvent) {
     return dynamoClient.send(command)
   })
 
-  await Promise.all(putItems)
+  const responses = await Promise.allSettled(putItems)
+
+  const batchItemFailures = responses
+    .map(
+      (response, index) =>
+        response.status === 'rejected' && {
+          itemIdentifier: event.Records[index].messageId,
+        },
+    )
+    .filter(Boolean)
+
+  return {
+    batchItemFailures,
+  }
 }
