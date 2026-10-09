@@ -38,6 +38,13 @@ functions:
       - httpApi:
           path: /
           method: GET
+  processPayment:
+    handler: src/functions/process-payment.handler
+    events:
+      - sqs:
+          arn: !GetAtt SQS.Arn
+          batchSize: 10
+          maximumBatchingWindow: 10
 
 resources:
   Resources:
