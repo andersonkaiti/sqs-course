@@ -77,3 +77,28 @@ resources:
         BillingMode: PAY_PER_REQUEST
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
+    DLQAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "orders-dlq-messages-visible"
+        AlarmDescription: "Triggered when messages arrive in the DLQ, indicating processing failures."
+        Namespace: "AWS/SQS"
+        MetricName: "ApproximateNumberOfMessagesVisible"
+        Dimensions:
+          - Name: QueueName
+            Value: !GetAtt DLQ.QueueName
+        Statistic: Sum
+        Period: 60
+        EvaluationPeriods: 1
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - !Ref SNS
+    SNS:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: DLQAlarm
+        Subscription:
+          - Protocol: email
+            Endpoint: anderkaiti@gmail.com
